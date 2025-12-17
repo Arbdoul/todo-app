@@ -3,8 +3,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useTaskStore } from '@/store/taskStore';
-import { useThemeStore } from '@/store/ThemeStore';
-
+import { useThemeStore } from '@/store/themeStores';
 export default function RootLayout() {
   const loadTasks = useTaskStore((state) => state.loadTasks);
   const loadTheme = useThemeStore((state) => state.loadTheme);

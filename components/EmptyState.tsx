@@ -1,8 +1,7 @@
-// components/EmptyState.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/store/ThemeStore';
+import { useTheme } from '@/store/themeStores';
 interface EmptyStateProps {
   message?: string;
   icon?: keyof typeof Ionicons.glyphMap;

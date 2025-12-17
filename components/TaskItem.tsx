@@ -1,11 +1,10 @@
-// components/TaskItem.tsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { formatDate, isOverdue } from '../utils/taskHelpers';
 import { Task } from '@/type';
-import { useTheme } from '@/store/ThemeStore';
+import { useTheme } from '@/store/themeStores';
 
 interface TaskItemProps {
   task: Task;

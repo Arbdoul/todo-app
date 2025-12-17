@@ -1,5 +1,3 @@
-// utils/constants.ts
-
 /**
  * Storage keys for AsyncStorage
  */
@@ -14,8 +12,8 @@ export const STORAGE_KEYS = {
 export const OPENAI_CONFIG = {
   API_URL: 'https://api.openai.com/v1',
   WHISPER_MODEL: 'whisper-1',
-  GPT_MODEL: 'gpt-4o-mini', // Using mini for cost efficiency
-  MAX_AUDIO_DURATION: 300, // 5 minutes in seconds
+  GPT_MODEL: 'gpt-4o-mini',
+  MAX_AUDIO_DURATION: 300,
 } as const;
 
 /**

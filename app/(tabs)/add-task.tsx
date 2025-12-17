@@ -17,8 +17,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { validateTaskTitle } from '../../utils/taskHelpers';
 import { useTaskStore } from '@/store/taskStore';
-import { useTheme } from '@/store/ThemeStore';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '@/store/themeStores';
 
 export default function AddTaskScreen() {
   const router = useRouter();

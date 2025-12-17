@@ -15,13 +15,13 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { filterTasks, sortTasks, searchTasks, getTaskStats } from '../../utils/taskHelpers';
 import { useTaskStore } from '@/store/taskStore';
-import { useTheme } from '@/store/ThemeStore';
 import { TaskFilter, TaskSort } from '@/type';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TaskItem } from '@/components/TaskItem';
 import { EmptyState } from '@/components/EmptyState';
 import { FAB } from '@/components/FAB';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
+import { useTheme } from '@/store/themeStores';
 export default function HomeScreen() {
   const router = useRouter();
 

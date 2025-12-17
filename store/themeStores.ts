@@ -1,4 +1,3 @@
-// stores/themeStore.ts
 import { create } from 'zustand';
 import { useColorScheme } from 'react-native';
 import { storage } from '../services/storage';
@@ -18,15 +17,13 @@ interface ThemeState {
 }
 
 /**
- * Zustand store for theme management
- * Handles theme switching and persistence
+ * store for theme management
  */
 export const useThemeStore = create<ThemeState>((set, get) => ({
   themeMode: 'auto',
 
   /**
    * Check if dark mode is active
-   * Takes into account system preference when mode is 'auto'
    */
   isDark: () => {
     const { themeMode } = get();

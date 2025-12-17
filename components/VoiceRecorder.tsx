@@ -1,4 +1,3 @@
-// components/VoiceRecorder.tsx
 import React, { useEffect, useRef } from 'react';
 import {
   View,
@@ -11,8 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ParsedTask } from '@/type';
-import { useTheme } from '@/store/ThemeStore';
 import { useVoiceInput } from '@/hook/useVoiceInput';
+import { useTheme } from '@/store/themeStores';
 
 interface VoiceRecorderProps {
   visible: boolean;

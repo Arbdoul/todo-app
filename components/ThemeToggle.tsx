@@ -1,9 +1,9 @@
-// components/ThemeToggle.tsx
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useTheme } from '@/store/ThemeStore';
+import { useTheme } from '@/store/themeStores';
+
 export const ThemeToggle: React.FC = () => {
   const { isDark, themeMode, setTheme, colors } = useTheme();
 
