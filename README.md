@@ -1,59 +1,109 @@
 # To-Do List App
 
-A React Native to-do list app with AI-powered voice input, built with Expo Router and TypeScript.
+A React Native to-do list app with voice input, built with Expo Router and TypeScript.
 
 ## Installation
 
+```bash
 # Clone and install
-
 git clone <your-repo-url>
 cd todo-app
 npm install
 
+# Install voice recognition
+npm install @react-native-voice/voice
+
+# Rebuild for native modules
+npx expo prebuild --clean
+
 # Run the app
+npx expo run:ios
+# or
+npx expo run:android
+```
 
-npx expo start
-
-Then press:
-
-- `i` for iOS simulator
-- `a` for Android emulator
-- Scan QR code for physical device
+**Note**: Voice feature requires running on a **real device** or rebuild with `npx expo run:ios/android` (won't work with `npx expo start` due to native modules).
 
 ## Features
 
 - Create, edit, delete tasks
 - Mark tasks complete/incomplete
 - Search and filter
-- Due dates
+- Due dates with overdue indicators
 - Dark mode
-- Voice input (demo mode)
+- **Voice input with speech recognition**
 
-## Voice Feature
+## 🎤 Voice Feature
 
-**Status**: Demo mode (returns mock data)
+**Status**: Fully functional
 
-**Why**: OpenAI Whisper + GPT APIs require **paid subscription**
+**Technology**: Device's native speech recognition (iOS/Android)
 
-**How it works now**:
+**Cost**: FREE - No API charges
 
-- Tap microphone → Tap "Done" → Creates 3 sample tasks
+### How It Works
 
-**Full implementation**: Available in `services/openai.ts` (commented out)
+1. Tap the **microphone button** (purple FAB)
+2. Speak naturally: "Buy groceries and call mom"
+3. Device transcribes your speech automatically
+4. App intelligently splits into separate tasks:
+   - "Buy groceries"
+   - "Call mom"
+5. Tasks added to your list!
 
-**To enable real voice**:
+### Requirements
 
-1. Get paid OpenAI API key
-2. Add to `.env`: `EXPO_PUBLIC_OPENAI_API_KEY=sk-your-key`
-3. Uncomment code in `services/openai.ts`
-4. Restart: `npx expo start -c`
+- Works on iOS and Android devices
+- Requires microphone and speech recognition permissions
+- Internet connection (for device speech recognition)
 
 ## Tech Stack
 
-1. React Native
-2. Expo Router
-3. TypeScript
-4. Zustand
-5. AsyncStorage
-6. expo-av
-7. OpenAI APIs
+- React Native + Expo SDK 51
+- Expo Router (file-based navigation)
+- TypeScript
+- Zustand (state management)
+- AsyncStorage (local storage)
+- **@react-native-voice/voice** (speech recognition)
+- expo-haptics (feedback)
+
+## Requirements Met
+
+All core features (CRUD, persistence, navigation)  
+Voice input via FAB  
+Speech-to-text transcription  
+Natural language task splitting  
+All bonus features (due dates, search, dark mode)
+
+## STroubleshooting
+
+**Voice not working:**
+
+- Make sure you're on a **real device** (not simulator)
+- Check microphone permissions are granted
+- Run `npx expo run:ios` (not `npx expo start`)
+
+**App crashes on iOS:**
+
+```bash
+npx expo prebuild --clean
+npx expo run:ios
+```
+
+**Permissions denied:**
+
+- Go to device Settings → Your App → Enable Microphone & Speech Recognition
+
+## 📱 Running on Device
+
+### iOS (Real Device)
+
+```bash
+npx expo run:ios --device
+```
+
+### Android (Real Device)
+
+```bash
+npx expo run:android --device
+```

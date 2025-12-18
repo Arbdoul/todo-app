@@ -12,12 +12,7 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-av",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone for voice task input."
-        }
-      ],
+
       [
         "@react-native-voice/voice",
         {
@@ -52,7 +47,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.arbdool.todoapp"
+      "package": "com.arbdool.todoapp",
+      "permissions": ["android.permission.RECORD_AUDIO", "android.permission.INTERNET"]
     }
   }
 }
