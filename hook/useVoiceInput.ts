@@ -1,14 +1,8 @@
-// hooks/useVoiceInput.ts
-import { useState, useCallback } from 'react';
-import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
-import { openAIService } from '../services/openai';
+import { useState, useCallback, useEffect } from 'react';
+import Voice from '@react-native-voice/voice';
+import { VoiceRecordingState, ParsedTask } from '@/type';
 import { ERROR_MESSAGES } from '../utils/constants';
-import { ParsedTask, VoiceRecordingState } from '@/type';
 
-/**
- * Custom hook for managing voice input functionality
- */
 export const useVoiceInput = () => {
   const [state, setState] = useState<VoiceRecordingState>({
     isRecording: false,
@@ -16,57 +10,49 @@ export const useVoiceInput = () => {
     error: null,
   });
 
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [transcribedText, setTranscribedText] = useState<string>('');
 
-  /**
-   * Request microphone permissions
-   */
-  const requestPermissions = async (): Promise<boolean> => {
-    try {
-      const { status } = await Audio.requestPermissionsAsync();
-      if (status !== 'granted') {
-        setState((prev) => ({ ...prev, error: ERROR_MESSAGES.VOICE_PERMISSION }));
-        return false;
+  useEffect(() => {
+    // Set up voice recognition event listeners
+    Voice.onSpeechStart = () => {
+      console.log('Speech started');
+      setState({ isRecording: true, isProcessing: false, error: null });
+    };
+
+    Voice.onSpeechEnd = () => {
+      console.log('Speech ended');
+    };
+
+    Voice.onSpeechResults = (e) => {
+      console.log('Speech results:', e.value);
+      if (e.value && e.value[0]) {
+        setTranscribedText(e.value[0]);
       }
-      return true;
-    } catch (error) {
-      console.error('Permission error:', error);
-      setState((prev) => ({ ...prev, error: ERROR_MESSAGES.VOICE_PERMISSION }));
-      return false;
-    }
-  };
+    };
+
+    Voice.onSpeechError = (e) => {
+      console.error('Speech error:', e.error);
+      setState({
+        isRecording: false,
+        isProcessing: false,
+        error: e.error?.message || ERROR_MESSAGES.VOICE_RECORDING,
+      });
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
 
   /**
-   * Start recording audio
+   * Start recording audio using device speech recognition
    */
   const startRecording = async (): Promise<boolean> => {
     try {
-      // Check permissions
-      const hasPermission = await requestPermissions();
-      if (!hasPermission) return false;
-
-      // Check if OpenAI is configured
-      if (!openAIService.isConfigured()) {
-        setState((prev) => ({
-          ...prev,
-          error: 'OpenAI API key not configured. Please add it to your .env file.',
-        }));
-        return false;
-      }
-
-      // Configure audio mode
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      // Start recording
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-
-      setRecording(newRecording);
+      setTranscribedText('');
       setState({ isRecording: true, isProcessing: false, error: null });
+
+      await Voice.start('en-US');
       return true;
     } catch (error) {
       console.error('Recording start error:', error);
@@ -80,44 +66,25 @@ export const useVoiceInput = () => {
   };
 
   /**
-   * Stop recording and process audio
+   * Stop recording and process the transcribed text
    */
   const stopRecording = async (): Promise<ParsedTask[] | null> => {
     try {
-      if (!recording) {
-        throw new Error('No active recording');
-      }
-
-      // Stop and unload recording
-      await recording.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-
-      const uri = recording.getURI();
-      if (!uri) {
-        throw new Error('Recording URI not found');
-      }
+      await Voice.stop();
 
       setState({ isRecording: false, isProcessing: true, error: null });
 
-      // Transcribe audio
-      const transcription = await openAIService.transcribeAudio(uri);
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (!transcription.trim()) {
+      if (!transcribedText.trim()) {
         throw new Error('No speech detected');
       }
 
-      // Parse tasks from transcription
-      const parsedTasks = await openAIService.parseTasks(transcription);
+      console.log('Transcribed text:', transcribedText);
 
-      // Clean up audio file
-      try {
-        await FileSystem.deleteAsync(uri, { idempotent: true });
-      } catch (cleanupError) {
-        console.warn('Failed to delete audio file:', cleanupError);
-      }
+      const parsedTasks = parseTasksFromText(transcribedText);
 
       setState({ isRecording: false, isProcessing: false, error: null });
-      setRecording(null);
 
       return parsedTasks;
     } catch (error) {
@@ -127,7 +94,6 @@ export const useVoiceInput = () => {
         isProcessing: false,
         error: error instanceof Error ? error.message : ERROR_MESSAGES.VOICE_PROCESSING,
       });
-      setRecording(null);
       return null;
     }
   };
@@ -137,22 +103,14 @@ export const useVoiceInput = () => {
    */
   const cancelRecording = useCallback(async () => {
     try {
-      if (recording) {
-        await recording.stopAndUnloadAsync();
-        await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-
-        const uri = recording.getURI();
-        if (uri) {
-          await FileSystem.deleteAsync(uri, { idempotent: true });
-        }
-      }
+      await Voice.cancel();
+      setTranscribedText('');
     } catch (error) {
       console.error('Cancel recording error:', error);
     } finally {
-      setRecording(null);
       setState({ isRecording: false, isProcessing: false, error: null });
     }
-  }, [recording]);
+  }, []);
 
   /**
    * Clear error state
@@ -169,3 +127,37 @@ export const useVoiceInput = () => {
     clearError,
   };
 };
+
+/**
+ * Parse transcribed text into multiple tasks
+ * Handles natural language like "buy groceries and call mom"
+ */
+function parseTasksFromText(text: string): ParsedTask[] {
+  // Clean up the text
+  const cleanText = text.trim();
+
+  // Split by common separators
+  const separators = /\s+and\s+|\s*,\s*|\s+then\s+/gi;
+  const parts = cleanText.split(separators);
+
+  // Filter and create tasks
+  const tasks: ParsedTask[] = parts
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0)
+    .map((part) => {
+      // Capitalize first letter
+      const title = part.charAt(0).toUpperCase() + part.slice(1);
+      return { title };
+    });
+
+  // If no splits were made, return the original as one task
+  if (tasks.length === 0 && cleanText.length > 0) {
+    return [
+      {
+        title: cleanText.charAt(0).toUpperCase() + cleanText.slice(1),
+      },
+    ];
+  }
+
+  return tasks;
+}

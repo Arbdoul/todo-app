@@ -17,6 +17,13 @@
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone for voice task input."
         }
+      ],
+      [
+        "@react-native-voice/voice",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access microphone for voice commands.",
+          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition."
+        }
       ]
     ],
     "experiments": {
@@ -36,7 +43,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.arbdool.todoapp",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Allow this app to access your microphone for voice task input."
+        "NSMicrophoneUsageDescription": "Allow this app to access your microphone for voice task input.",
+        "NSSpeechRecognitionUsageDescription": "This app needs speech recognition to convert your voice into tasks."
       }
     },
     "android": {

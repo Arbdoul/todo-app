@@ -73,7 +73,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await storage.saveTasks(updatedTasks);
     } catch (error) {
       console.error('Failed to update task:', error);
-      // Revert on error
       set({ tasks: oldTasks });
       throw error;
     }
@@ -138,67 +137,3 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
 }));
-
-// // stores/themeStore.ts
-// import { create } from 'zustand';
-// import { useColorScheme } from 'react-native';
-// import { storage } from '../services/storage';
-// import { COLORS } from '../utils/constants';
-// import { ThemeMode } from '@/type';
-
-// interface ThemeState {
-//   themeMode: ThemeMode;
-
-//   // Actions
-//   setTheme: (mode: ThemeMode) => Promise<void>;
-//   loadTheme: () => Promise<void>;
-// }
-
-// /**
-//  * Zustand store for theme management
-//  * Handles theme switching and persistence
-//  */
-// export const useThemeStore = create<ThemeState>((set) => ({
-//   themeMode: 'auto',
-
-//   /**
-//    * Set theme mode and persist to storage
-//    */
-//   setTheme: async (mode) => {
-//     set({ themeMode: mode });
-//     try {
-//       await storage.saveTheme(mode);
-//     } catch (error) {
-//       console.error('Failed to save theme:', error);
-//     }
-//   },
-
-//   /**
-//    * Load theme from storage
-//    */
-//   loadTheme: async () => {
-//     try {
-//       const savedTheme = await storage.getTheme();
-//       set({ themeMode: savedTheme });
-//     } catch (error) {
-//       console.error('Failed to load theme:', error);
-//     }
-//   },
-// }));
-
-// /**
-//  * Hook to use theme (simpler API for components)
-//  */
-// export const useTheme = () => {
-//   const themeMode = useThemeStore((state) => state.themeMode);
-//   const setTheme = useThemeStore((state) => state.setTheme);
-//   const systemColorScheme = useColorScheme();
-
-//   // Compute isDark based on theme mode and system preference
-//   const isDark = themeMode === 'dark' || (themeMode === 'auto' && systemColorScheme === 'dark');
-
-//   // Get colors based on current theme
-//   const colors = isDark ? COLORS.dark : COLORS.light;
-
-//   return { themeMode, isDark, colors, setTheme };
-// };
