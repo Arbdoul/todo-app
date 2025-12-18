@@ -1,4 +1,3 @@
-// services/storage.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../utils/constants';
 import { StorageService, Task, ThemeMode } from '@/type';
@@ -88,5 +87,4 @@ class Storage implements StorageService {
   }
 }
 
-// Export singleton instance
 export const storage = new Storage();
