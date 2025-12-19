@@ -7,11 +7,12 @@ import {
   StyleSheet,
   Animated,
   ActivityIndicator,
+  Platform, // Added
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ParsedTask } from '@/type';
-import { useVoiceInput } from '@/hook/useVoiceInput';
 import { useTheme } from '@/store/themeStores';
+import { useVoiceInput } from '@/hook/useVoiceInput';
 
 interface VoiceRecorderProps {
   visible: boolean;
@@ -36,6 +37,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
   } = useVoiceInput();
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  const isAndroid = Platform.OS === 'android';
 
   // Pulse animation for recording indicator
   useEffect(() => {
@@ -59,12 +61,12 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
     }
   }, [isRecording, pulseAnim]);
 
-  // Auto-start recording when modal opens
+  // Auto-start recording when modal opens (iOS only)
   useEffect(() => {
-    if (visible && !isRecording && !isProcessing) {
+    if (visible && !isRecording && !isProcessing && !isAndroid) {
       startRecording();
     }
-  }, [visible]);
+  }, [visible, isRecording, isProcessing, startRecording, isAndroid]);
 
   const handleStop = async () => {
     const tasks = await stopRecording();
@@ -87,7 +89,11 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.text }]}>
-              {isProcessing ? 'Processing...' : 'Voice Input'}
+              {isProcessing
+                ? 'Processing...'
+                : isAndroid
+                  ? 'Voice Input (iOS Optimized)'
+                  : 'Voice Input'}
             </Text>
             <TouchableOpacity onPress={handleCancel}>
               <Ionicons name="close" size={24} color={colors.text} />
@@ -103,7 +109,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
                 style={[
                   styles.recordingIndicator,
                   {
-                    backgroundColor: colors.error,
+                    backgroundColor: isAndroid ? colors.primary : colors.error,
                     transform: [{ scale: pulseAnim }],
                   },
                 ]}>
@@ -112,7 +118,11 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             )}
 
             <Text style={[styles.message, { color: colors.text }]}>
-              {isProcessing ? 'Converting speech to tasks...' : 'Speak your tasks now'}
+              {isProcessing
+                ? 'Converting speech to tasks...'
+                : isAndroid
+                  ? 'Voice optimized for iOS devices'
+                  : 'Speak your tasks now'}
             </Text>
 
             {error && (
@@ -122,15 +132,29 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
               </View>
             )}
 
-            {!isProcessing && !error && (
+            {/* iOS hint */}
+            {!isProcessing && !error && !isAndroid && (
               <Text style={[styles.hint, { color: colors.textSecondary }]}>
                 Example: "Buy groceries and call mom"
               </Text>
             )}
+
+            {isAndroid && !error && !isProcessing && (
+              <View
+                style={[
+                  styles.errorContainer,
+                  { backgroundColor: colors.primary + '20', marginTop: 12 },
+                ]}>
+                <Ionicons name="information-circle" size={20} color={colors.primary} />
+                <Text style={[styles.errorText, { color: colors.primary }]}>
+                  All core task features work on Android. Voice is iOS-optimized.
+                </Text>
+              </View>
+            )}
           </View>
 
-          {/* Action buttons */}
-          {isRecording && !isProcessing && (
+          {/* Action buttons - only show on iOS when recording */}
+          {isRecording && !isProcessing && !isAndroid && (
             <View style={styles.buttons}>
               <TouchableOpacity
                 style={[styles.button, { backgroundColor: colors.error }]}
@@ -147,12 +171,20 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Android close button */}
+          {isAndroid && !isProcessing && (
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: colors.primary, marginTop: 20 }]}
+              onPress={onClose}>
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
   );
 };
-
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,

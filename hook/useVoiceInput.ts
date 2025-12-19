@@ -1,182 +1,230 @@
 // import { useState, useCallback, useEffect } from 'react';
 // import Voice from '@react-native-voice/voice';
-// import { VoiceRecordingState, ParsedTask } from '@/type';
-// import { ERROR_MESSAGES } from '../utils/constants';
 
 // export const useVoiceInput = () => {
-//   const [state, setState] = useState<VoiceRecordingState>({
+//   const [state, setState] = useState({
 //     isRecording: false,
 //     isProcessing: false,
-//     error: null,
+//     error: null as string | any,
 //   });
 
-//   const [transcribedText, setTranscribedText] = useState<string>('');
+//   const [transcribedText, setTranscribedText] = useState('');
 
 //   useEffect(() => {
-//     // Set up voice recognition event listeners
 //     Voice.onSpeechStart = () => {
-//       console.log('Speech started');
 //       setState({ isRecording: true, isProcessing: false, error: null });
-//     };
-
-//     Voice.onSpeechEnd = () => {
-//       console.log('Speech ended');
 //     };
 
 //     Voice.onSpeechResults = (e) => {
-//       console.log('Speech results:', e.value);
-//       if (e.value && e.value[0]) {
-//         setTranscribedText(e.value[0]);
-//       }
+//       if (e.value?.[0]) setTranscribedText(e.value[0]);
 //     };
 
 //     Voice.onSpeechError = (e) => {
-//       console.error('Speech error:', e.error);
-//       setState({
-//         isRecording: false,
-//         isProcessing: false,
-//         error: e.error?.message || ERROR_MESSAGES.VOICE_RECORDING,
-//       });
+//       setState({ isRecording: false, isProcessing: false, error: e.error?.message });
 //     };
 
 //     return () => {
-//       Voice.destroy().then(Voice.removeAllListeners);
+//       Voice.destroy()
+//         .then(Voice.removeAllListeners)
+//         .catch(() => {});
 //     };
 //   }, []);
 
-//   /**
-//    * Start recording audio using device speech recognition
-//    */
-//   const startRecording = async (): Promise<boolean> => {
+//   const startRecording = async () => {
 //     try {
-//       setTranscribedText('');
-//       setState({ isRecording: true, isProcessing: false, error: null });
-
 //       await Voice.start('en-US');
 //       return true;
 //     } catch (error) {
-//       console.error('Recording start error:', error);
-//       setState({
-//         isRecording: false,
-//         isProcessing: false,
-//         error: ERROR_MESSAGES.VOICE_RECORDING,
-//       });
+//       setState({ isRecording: false, isProcessing: false, error: 'Failed to start' });
 //       return false;
 //     }
 //   };
 
-//   /**
-//    * Stop recording and process the transcribed text
-//    */
-//   const stopRecording = async (): Promise<ParsedTask[] | null> => {
+//   const stopRecording = async () => {
 //     try {
 //       await Voice.stop();
-
-//       setState({ isRecording: false, isProcessing: true, error: null });
-
-//       await new Promise((resolve) => setTimeout(resolve, 500));
-
-//       if (!transcribedText.trim()) {
-//         throw new Error('No speech detected');
-//       }
-
-//       console.log('Transcribed text:', transcribedText);
-
-//       const parsedTasks = parseTasksFromText(transcribedText);
-
-//       setState({ isRecording: false, isProcessing: false, error: null });
-
-//       return parsedTasks;
+//       return [{ title: transcribedText || 'Task from voice' }];
 //     } catch (error) {
-//       console.error('Recording stop error:', error);
-//       setState({
-//         isRecording: false,
-//         isProcessing: false,
-//         error: error instanceof Error ? error.message : ERROR_MESSAGES.VOICE_PROCESSING,
-//       });
 //       return null;
 //     }
 //   };
-
-//   /**
-//    * Cancel recording
-//    */
-//   const cancelRecording = useCallback(async () => {
-//     try {
-//       await Voice.cancel();
-//       setTranscribedText('');
-//     } catch (error) {
-//       console.error('Cancel recording error:', error);
-//     } finally {
-//       setState({ isRecording: false, isProcessing: false, error: null });
-//     }
-//   }, []);
-
-//   /**
-//    * Clear error state
-//    */
-//   const clearError = useCallback(() => {
-//     setState((prev) => ({ ...prev, error: null }));
-//   }, []);
 
 //   return {
 //     ...state,
 //     startRecording,
 //     stopRecording,
-//     cancelRecording,
-//     clearError,
+//     cancelRecording: async () => Voice.cancel(),
+//     clearError: () => setState((prev) => ({ ...prev, error: null })),
 //   };
 // };
 
-// /**
-//  * Parse transcribed text into multiple tasks
-//  * Handles natural language like "buy groceries and call mom"
-//  */
-// function parseTasksFromText(text: string): ParsedTask[] {
-//   // Clean up the text
-//   const cleanText = text.trim();
-
-//   // Split by common separators
-//   const separators = /\s+and\s+|\s*,\s*|\s+then\s+/gi;
-//   const parts = cleanText.split(separators);
-
-//   // Filter and create tasks
-//   const tasks: ParsedTask[] = parts
-//     .map((part) => part.trim())
-//     .filter((part) => part.length > 0)
-//     .map((part) => {
-//       // Capitalize first letter
-//       const title = part.charAt(0).toUpperCase() + part.slice(1);
-//       return { title };
-//     });
-
-//   // If no splits were made, return the original as one task
-//   if (tasks.length === 0 && cleanText.length > 0) {
-//     return [
-//       {
-//         title: cleanText.charAt(0).toUpperCase() + cleanText.slice(1),
-//       },
-//     ];
-//   }
-
-//   return tasks;
-// }
-
-// hook/useVoiceInput.ts
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
+import Voice from '@react-native-voice/voice';
 
-// Import platform-specific implementations
-let useVoiceInputImplementation;
-
-if (Platform.OS === 'ios') {
-  try {
-    useVoiceInputImplementation = require('./useVoiceInput.ios').useVoiceInput;
-  } catch {
-    // Fallback if iOS version fails
-    useVoiceInputImplementation = require('./useVoiceInput.android').useVoiceInput;
-  }
-} else {
-  useVoiceInputImplementation = require('./useVoiceInput.android').useVoiceInput;
+interface VoiceState {
+  isRecording: boolean;
+  isProcessing: boolean;
+  error: string | null;
 }
 
-export const useVoiceInput = useVoiceInputImplementation;
+export const useVoiceInput = () => {
+  const [state, setState] = useState<VoiceState>({
+    isRecording: false,
+    isProcessing: false,
+    error: null,
+  });
+
+  const [transcribedText, setTranscribedText] = useState('');
+  const voiceInitialized = useRef(false);
+
+  useEffect(() => {
+    // Only initialize Voice on iOS
+    if (Platform.OS === 'ios') {
+      if (voiceInitialized.current) return;
+
+      Voice.onSpeechStart = () => {
+        console.log('Speech started');
+        setState({ isRecording: true, isProcessing: false, error: null });
+      };
+
+      Voice.onSpeechResults = (e: any) => {
+        console.log('Speech results:', e.value);
+        if (e.value?.[0]) {
+          setTranscribedText(e.value[0]);
+        }
+      };
+
+      Voice.onSpeechError = (e: any) => {
+        console.error('Speech error:', e.error);
+        setState({
+          isRecording: false,
+          isProcessing: false,
+          error: e.error?.message || 'Speech recognition failed',
+        });
+      };
+
+      Voice.onSpeechEnd = () => {
+        console.log('Speech ended');
+      };
+
+      voiceInitialized.current = true;
+    }
+
+    return () => {
+      // Only cleanup on iOS
+      if (Platform.OS === 'ios' && voiceInitialized.current) {
+        Voice.destroy()
+          .then(() => Voice.removeAllListeners?.())
+          .catch(() => {});
+      }
+    };
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    try {
+      // Android: Return early with message
+      if (Platform.OS === 'android') {
+        setState({
+          isRecording: false,
+          isProcessing: false,
+          error: 'Voice input is optimized for iOS. Please use text input on Android.',
+        });
+        return false;
+      }
+
+      // iOS: Start voice recognition
+      setTranscribedText('');
+      setState({ isRecording: true, isProcessing: false, error: null });
+
+      console.log('Starting voice recognition...');
+      await Voice.start('en-US');
+      return true;
+    } catch (error: any) {
+      console.error('Recording start error:', error);
+
+      let errorMessage = 'Failed to start recording';
+      if (error?.message?.includes('permission')) {
+        errorMessage = 'Microphone permission required';
+      }
+
+      setState({
+        isRecording: false,
+        isProcessing: false,
+        error: errorMessage,
+      });
+      return false;
+    }
+  }, []);
+
+  const stopRecording = useCallback(async () => {
+    try {
+      // Android: Return null immediately
+      if (Platform.OS === 'android') {
+        return null;
+      }
+
+      // iOS: Stop and process
+      console.log('Stopping voice recognition...');
+      await Voice.stop();
+      setState({ isRecording: false, isProcessing: true, error: null });
+
+      // Wait a bit for processing
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (!transcribedText.trim()) {
+        throw new Error('No speech detected');
+      }
+
+      console.log('Transcribed text:', transcribedText);
+
+      // Parse tasks from transcribed text
+      const tasks = transcribedText
+        .split(/\s+and\s+|\s*,\s*/gi)
+        .map((part) => part.trim())
+        .filter((part) => part.length > 0)
+        .map((part) => ({
+          title: part.charAt(0).toUpperCase() + part.slice(1),
+        }));
+
+      console.log('Parsed tasks:', tasks);
+      setState({ isRecording: false, isProcessing: false, error: null });
+
+      return tasks.length > 0 ? tasks : [{ title: transcribedText }];
+    } catch (error: any) {
+      console.error('Recording stop error:', error);
+      setState({
+        isRecording: false,
+        isProcessing: false,
+        error: error?.message || 'Failed to process speech',
+      });
+      return null;
+    }
+  }, [transcribedText]);
+
+  const cancelRecording = useCallback(async () => {
+    try {
+      // Only cancel on iOS
+      if (Platform.OS === 'ios' && voiceInitialized.current) {
+        await Voice.cancel();
+      }
+      setTranscribedText('');
+    } catch (error) {
+      console.error('Cancel error:', error);
+    } finally {
+      setState({ isRecording: false, isProcessing: false, error: null });
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    setState((prev) => ({ ...prev, error: null }));
+  }, []);
+
+  return {
+    ...state,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    clearError,
+  };
+};
