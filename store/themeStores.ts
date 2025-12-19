@@ -7,11 +7,8 @@ import { ThemeMode } from '@/type';
 interface ThemeState {
   themeMode: ThemeMode;
 
-  // Computed
   isDark: () => boolean;
   colors: () => typeof COLORS.light;
-
-  // Actions
   setTheme: (mode: ThemeMode) => Promise<void>;
   loadTheme: () => Promise<void>;
 }
@@ -65,7 +62,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
 }));
 
 /**
- * Hook to use theme (simpler API for components)
+ * Hook to use theme
  */
 export const useTheme = () => {
   const themeMode = useThemeStore((state) => state.themeMode);

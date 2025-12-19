@@ -112,7 +112,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await storage.saveTasks(updatedTasks);
     } catch (error) {
       console.error('Failed to toggle task:', error);
-      // Revert on error
       set({ tasks: oldTasks });
       throw error;
     }
@@ -131,7 +130,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       await storage.saveTasks(updatedTasks);
     } catch (error) {
       console.error('Failed to clear completed tasks:', error);
-      // Revert on error
       set({ tasks: oldTasks });
       throw error;
     }

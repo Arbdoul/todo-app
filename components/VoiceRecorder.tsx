@@ -153,7 +153,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
             )}
           </View>
 
-          {/* Action buttons - only show on iOS when recording */}
           {isRecording && !isProcessing && !isAndroid && (
             <View style={styles.buttons}>
               <TouchableOpacity
@@ -170,15 +169,6 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({
                 <Text style={styles.buttonText}>Done</Text>
               </TouchableOpacity>
             </View>
-          )}
-
-          {/* Android close button */}
-          {isAndroid && !isProcessing && (
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: colors.primary, marginTop: 20 }]}
-              onPress={onClose}>
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
           )}
         </View>
       </View>

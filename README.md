@@ -18,11 +18,9 @@ npx expo prebuild --clean
 
 # Run the app
 npx expo run:ios
-# or
-npx expo run:android
 ```
 
-**Note**: Voice feature requires running with `npx expo run:ios/android` (won't work with `npx expo start` due to native modules).
+**Note**: Voice feature requires running with `npx expo run:ios` (won't work with `npx expo start` due to native modules).
 
 ## Features
 
@@ -35,11 +33,9 @@ npx expo run:android
 
 ## Voice Feature
 
-**Status**: Fully functional on iOS | iOS only
+**Status**: Fully functional
 
 **Technology**: Device's native speech recognition
-
-**Cost**: FREE - No API charges
 
 ### How It Works (iOS)
 
@@ -61,12 +57,9 @@ The app recognizes natural language patterns:
 
 ### Platform Support
 
-| Platform    | Status  | Notes                                          |
-| ----------- | ------- | ---------------------------------------------- |
-| **iOS**     | Working | Fully functional on real devices and simulator |
-| **Android** | Limited | Voice recognition not currently working        |
-
-**Android Note**: While the app's core features work perfectly on Android, voice input is currently iOS-only. Android users can add tasks using the standard text input method.
+| Platform | Status  | Notes                                          |
+| -------- | ------- | ---------------------------------------------- |
+| **iOS**  | Working | Fully functional on real devices and simulator |
 
 ### Requirements (iOS)
 
@@ -75,7 +68,7 @@ The app recognizes natural language patterns:
 - Speech recognition permission
 - Internet connection
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - React Native + Expo SDK 51
 - Expo Router (file-based navigation)
@@ -101,11 +94,6 @@ All bonus features (due dates, search, dark mode)
 - Check microphone permissions are granted
 - Run `npx expo run:ios --device`
 
-**Voice not working on Android:**
-
-- Voice feature is currently iOS-only
-- Use the standard "+" button to add tasks manually
-
 **App crashes on iOS:**
 
 ```bash
@@ -123,10 +111,4 @@ npx expo run:ios
 
 ```bash
 npx expo run:ios --device
-```
-
-### Android (Real Device)
-
-```bash
-npx expo run:android --device
 ```
