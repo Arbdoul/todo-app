@@ -39,8 +39,6 @@ npx expo run:android
 
 **Technology**: Device's native speech recognition
 
-**Cost**: FREE - No API charges
-
 ### How It Works (iOS)
 
 1. Tap the **microphone button** (purple FAB)
@@ -50,14 +48,6 @@ npx expo run:android
    - "Buy groceries"
    - "Call mom"
 5. Tasks added to your list!
-
-### Smart Task Splitting
-
-The app recognizes natural language patterns:
-
-- **"and"**: "Buy milk **and** call mom" → 2 tasks
-- **Commas**: "Clean room**,** do laundry" → 2 tasks
-- **"then"**: "Finish work **then** exercise" → 2 tasks
 
 ### Platform Support
 
